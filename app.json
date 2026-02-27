@@ -26,9 +26,6 @@
     },
     "plugins": [
       [
-        "react-native-webview"
-      ],
-      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",

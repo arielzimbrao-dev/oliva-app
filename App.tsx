@@ -1,5 +1,13 @@
-import React, { useRef, useState } from 'react';
-import { StyleSheet, View, ActivityIndicator, Text, TouchableOpacity, SafeAreaView } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  StyleSheet,
+  View,
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  SafeAreaView,
+  Platform,
+} from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Linking from 'expo-linking';
 
@@ -17,6 +25,16 @@ export default function App() {
   const webViewRef = useRef<WebView>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      return;
+    }
+
+    if (typeof window !== 'undefined') {
+      window.location.replace(OLIVA_URL);
+    }
+  }, []);
 
   /**
    * Determine if a URL belongs to the Oliva domain
@@ -118,6 +136,18 @@ export default function App() {
     webViewRef.current?.reload();
   };
 
+  if (Platform.OS === 'web') {
+    return (
+      <SafeAreaView style={styles.webFallbackContainer}>
+        <ActivityIndicator size="large" color="#1976d2" />
+        <Text style={styles.webFallbackText}>Redirecionando para Oliva Church...</Text>
+        <TouchableOpacity style={styles.reloadButton} onPress={() => Linking.openURL(OLIVA_URL)}>
+          <Text style={styles.reloadButtonText}>Abrir Oliva Church</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <WebView
@@ -161,6 +191,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  webFallbackContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    gap: 12,
+  },
+  webFallbackText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
   },
   webview: {
     flex: 1,

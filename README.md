@@ -21,9 +21,15 @@ It loads the web app (`https://oliva.church/`) inside a `WebView`, keeps interna
 
 ## Requirements
 
-- Node.js 20+
+- Node.js 20 (LTS)
 - npm
 - Expo CLI via `npx expo`
+
+If you use nvm:
+
+```bash
+nvm use
+```
 
 ## How to run
 
@@ -37,6 +43,12 @@ npm install
 
 ```bash
 npm start
+```
+
+For Expo Go on physical devices (when LAN/QR does not connect), use:
+
+```bash
+npm run start:tunnel
 ```
 
 3. Open target:
@@ -69,3 +81,4 @@ Use `.env.example` as reference for values such as:
 
 - Keep this app wrapper-focused; business logic stays in `oliva-front` and `oliva-back`.
 - See `context.md` in this folder for coding conventions and architecture constraints.
+- On web, the wrapper redirects to `https://oliva.church/` (WebView/iframe is mobile-focused).
