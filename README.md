@@ -1,50 +1,71 @@
-# Welcome to your Expo app 👋
+# Oliva App (Mobile Wrapper)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+`oliva-app` is the mobile wrapper of Oliva Church built with Expo + React Native.
 
-## Get started
+It loads the web app (`https://oliva.church/`) inside a `WebView`, keeps internal navigation in-app, and opens external links in the device browser.
 
-1. Install dependencies
+## What this project does
 
-   ```bash
-   npm install
-   ```
+- Renders Oliva web app inside native mobile shell.
+- Preserves web session/storage (`domStorageEnabled`).
+- Intercepts external URLs and opens them with `expo-linking`.
+- Shows native loading and error/retry UI.
 
-2. Start the app
+## Main files
 
-   ```bash
-   npx expo start
-   ```
+- `App.tsx`: mobile wrapper runtime (WebView + navigation control + error flow).
+- `storage.ts`: AsyncStorage manager helpers.
+- `utils.ts`: domain/scheme validation helpers (`isOlivaDomain`, `isSecureScheme`, etc.).
+- `types.ts`: app and WebView shared types.
+- `app.json`: Expo metadata (name, bundle/package ids, icons).
 
-In the output, you'll find options to open the app in a
+## Requirements
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- Node.js 20+
+- npm
+- Expo CLI via `npx expo`
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## How to run
 
-## Get a fresh project
-
-When you're ready, run:
+1. Install dependencies:
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. Start Expo:
 
-## Learn more
+```bash
+npm start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+3. Open target:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- Press `a` for Android emulator
+- Press `i` for iOS simulator
+- Press `w` for web preview
+- Or scan QR with Expo Go
 
-## Join the community
+## Useful commands
 
-Join our community of developers creating universal apps.
+```bash
+npm start
+npm run android
+npm run ios
+npm run web
+npm run lint
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Local config
+
+Use `.env.example` as reference for values such as:
+
+- `OLIVA_BASE_URL`
+- `OLIVA_DOMAIN`
+- `USER_AGENT`
+- `DEBUG_MODE`
+
+## Notes
+
+- Keep this app wrapper-focused; business logic stays in `oliva-front` and `oliva-back`.
+- See `context.md` in this folder for coding conventions and architecture constraints.
