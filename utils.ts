@@ -2,7 +2,49 @@
  * Utilities para manipulação de URLs e validações da app
  */
 
+import { getLocales } from 'expo-localization';
+
 const OLIVA_DOMAIN = 'oliva.church';
+
+/**
+ * Mapeamento de locale do dispositivo para URL localizada da Oliva Church.
+ * Suporta pt-BR, pt-PT, en, es e fr. Fallback: English.
+ */
+const LOCALE_URL_MAP: Record<string, string> = {
+  'pt-BR': 'https://oliva.church/pt-br/login',
+  'pt-PT': 'https://oliva.church/pt-pt/login',
+  'pt':    'https://oliva.church/pt-br/login',
+  'en':    'https://oliva.church/en/login',
+  'es':    'https://oliva.church/es/login',
+  'fr':    'https://oliva.church/fr/login',
+};
+
+const OLIVA_FALLBACK_URL = 'https://oliva.church/en/login';
+
+/**
+ * Retorna a URL de login correta com base no idioma do dispositivo.
+ * Tenta match exato (ex: "pt-BR"), depois por idioma base (ex: "pt").
+ * Fallback para inglês se o locale não for reconhecido.
+ */
+export const getLocaleUrl = (): string => {
+  try {
+    const locales = getLocales();
+    const languageTag = locales[0]?.languageTag ?? '';
+
+    if (LOCALE_URL_MAP[languageTag]) {
+      return LOCALE_URL_MAP[languageTag];
+    }
+
+    const lang = languageTag.split('-')[0];
+    if (lang && LOCALE_URL_MAP[lang]) {
+      return LOCALE_URL_MAP[lang];
+    }
+
+    return OLIVA_FALLBACK_URL;
+  } catch {
+    return OLIVA_FALLBACK_URL;
+  }
+};
 
 /**
  * Verifica se uma URL pertence aos domínios Oliva permitidos
@@ -16,7 +58,7 @@ export const isOlivaDomain = (url: string): boolean => {
       hostname === OLIVA_DOMAIN ||
       hostname.endsWith(`.${OLIVA_DOMAIN}`)
     );
-  } catch (error) {
+  } catch {
     console.warn('Invalid URL:', url);
     return false;
   }

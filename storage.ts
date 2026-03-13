@@ -88,7 +88,7 @@ class StorageManager {
       const cacheTime = parseInt(timestamp, 10);
       const now = Date.now();
       return now - cacheTime < maxAgeMs;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

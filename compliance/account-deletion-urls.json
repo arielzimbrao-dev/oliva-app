@@ -1,0 +1,25 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{
+  "fallbackLocale": "en",
+  "accountDeletionUrls": {
+    "en": "https://oliva.church/en/app/delete-church",
+    "es": "https://oliva.church/es/app/eliminar-iglesia",
+    "fr": "https://oliva.church/fr/app/supprimer-eglise",
+    "pt-br": "https://oliva.church/pt-br/app/apagar-igreja",
+    "pt-pt": "https://oliva.church/pt-pt/app/apagar-igreja"
+  }
+}

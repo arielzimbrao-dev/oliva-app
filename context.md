@@ -6,7 +6,8 @@
 
 ## Main Files and Entry Points
 
-- `App.tsx`: WebView host, loading/error UX, external link handling.
+- `App.native.tsx`: WebView host, loading/error UX, external link handling.
+- `App.web.tsx`: Web redirect entry with fallback action.
 - `app.json`: Expo app configuration.
 - `storage.ts`: AsyncStorage helper for local persistence utilities.
 - `utils.ts` and `types.ts`: URL/security helpers and shared types.
@@ -15,6 +16,7 @@
 ## Architecture and Patterns
 
 - Wrapper-first architecture: load `https://oliva.church/` and keep mobile shell minimal.
+- Single-entry runtime via `expo/AppEntry` + platform files (`App.native.tsx`, `App.web.tsx`).
 - Domain allowlist checks decide in-WebView navigation vs native browser handoff.
 - Web app owns authentication/business rules; wrapper provides mobile UX glue only.
 

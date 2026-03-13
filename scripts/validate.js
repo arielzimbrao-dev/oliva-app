@@ -13,26 +13,55 @@ console.log('\n✅ Validando configuração do Oliva App...\n');
 // Apontar para a raiz do projeto (um nível acima de scripts/)
 const projectRoot = path.resolve(__dirname, '..');
 
+const isValidHttpsUrl = (value) => {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 const checks = [
   {
     name: 'package.json',
     file: path.join(projectRoot, 'package.json'),
     validator: (content) => {
       const pkg = JSON.parse(content);
-      return pkg.main === 'App.tsx' && pkg.dependencies['react-native-webview'];
+      return pkg.main === 'expo/AppEntry' && pkg.dependencies['react-native-webview'];
     },
   },
   {
-    name: 'App.tsx',
-    file: path.join(projectRoot, 'App.tsx'),
-    validator: (content) => content.includes('WebView') && content.includes('oliva.church'),
+    name: 'App.native.tsx',
+    file: path.join(projectRoot, 'App.native.tsx'),
+    validator: (content) => {
+      return (
+        content.includes("from 'react-native-webview'") &&
+        content.includes('onShouldStartLoadWithRequest') &&
+        content.includes('appConfig.OLIVA_URL')
+      );
+    },
+  },
+  {
+    name: 'App.web.tsx',
+    file: path.join(projectRoot, 'App.web.tsx'),
+    validator: (content) => {
+      return (
+        content.includes('window.location.replace') &&
+        !content.includes('react-native-webview')
+      );
+    },
   },
   {
     name: 'app.json',
     file: path.join(projectRoot, 'app.json'),
     validator: (content) => {
       const config = JSON.parse(content);
-      return config.expo.slug === 'oliva-church' && config.expo.name === 'Oliva Church';
+      return (
+        config.expo.slug === 'oliva-church' &&
+        config.expo.name === 'Oliva Church' &&
+        config.expo.newArchEnabled === false
+      );
     },
   },
   {
@@ -49,6 +78,41 @@ const checks = [
     name: 'armazenamento',
     file: path.join(projectRoot, 'storage.ts'),
     validator: (content) => content.includes('StorageManager'),
+  },
+  {
+    name: 'Expo Router scaffold removido',
+    file: path.join(projectRoot, 'package.json'),
+    validator: () => !fs.existsSync(path.join(projectRoot, 'app')),
+  },
+  {
+    name: 'URLs de exclusão de conta',
+    file: path.join(projectRoot, 'compliance', 'account-deletion-urls.json'),
+    validator: (content) => {
+      const config = JSON.parse(content);
+      const { fallbackLocale, accountDeletionUrls } = config;
+
+      if (!fallbackLocale || typeof fallbackLocale !== 'string') {
+        return false;
+      }
+
+      if (!accountDeletionUrls || typeof accountDeletionUrls !== 'object') {
+        return false;
+      }
+
+      const locales = Object.keys(accountDeletionUrls);
+      if (locales.length === 0) {
+        return false;
+      }
+
+      if (!accountDeletionUrls[fallbackLocale]) {
+        return false;
+      }
+
+      return locales.every((locale) => {
+        const url = accountDeletionUrls[locale];
+        return typeof locale === 'string' && locale.length > 0 && typeof url === 'string' && isValidHttpsUrl(url);
+      });
+    },
   },
 ];
 
