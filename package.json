@@ -5,9 +5,9 @@
   "scripts": {
     "start": "expo start",
     "start:tunnel": "expo start --tunnel",
-    "android": "expo start --android",
+    "android": "expo run:android",
     "android:tunnel": "expo start --android --tunnel",
-    "ios": "expo start --ios",
+    "ios": "expo run:ios",
     "ios:tunnel": "expo start --ios --tunnel",
     "web": "expo start --web",
     "lint": "expo lint",
@@ -43,7 +43,7 @@
     "typescript": "~5.9.2"
   },
   "engines": {
-    "node": "20.x"
+    "node": ">=20"
   },
   "private": true
 }

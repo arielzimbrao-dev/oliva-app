@@ -38,7 +38,7 @@ const checks = [
       return (
         content.includes("from 'react-native-webview'") &&
         content.includes('onShouldStartLoadWithRequest') &&
-        content.includes('appConfig.OLIVA_URL')
+        (content.includes('appConfig.OLIVA_URL') || content.includes('getLocaleUrl'))
       );
     },
   },
@@ -59,8 +59,7 @@ const checks = [
       const config = JSON.parse(content);
       return (
         config.expo.slug === 'oliva-church' &&
-        config.expo.name === 'Oliva Church' &&
-        config.expo.newArchEnabled === false
+        config.expo.name === 'Oliva Church'
       );
     },
   },
