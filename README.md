@@ -1,102 +1,156 @@
-# Oliva App (Mobile Wrapper)
+# Oliva Church — App Mobile
 
-`oliva-app` is the mobile wrapper of Oliva Church built with Expo + React Native.
+**Versão:** 1.0.0 | **Plataformas:** Android · iOS · Web (fallback) | **Stack:** Expo 54 · React Native 0.81 · TypeScript  
+**Status:** Ativo em desenvolvimento
 
-It loads the web app (`https://oliva.church/`) inside a `WebView`, keeps internal navigation in-app, and opens external links in the device browser.
+---
 
-## What this project does
+## O que é este projeto?
 
-- Renders Oliva web app inside native mobile shell.
-- Preserves web session/storage (`domStorageEnabled`).
-- Intercepts external URLs and opens them with `expo-linking`.
-- Shows native loading and error/retry UI.
+O `oliva-app` é o **wrapper mobile oficial do Oliva Church**. Sua função principal é hospedar a aplicação web `oliva-front` dentro de uma WebView nativa, oferecendo experiência de app (ícone na tela inicial, splash screen, gestos nativos, botão de voltar no Android) sem duplicar a lógica de negócio no lado mobile.
 
-## Main files
+A autenticação, regras de negócio e todas as funcionalidades (membros, financeiro, eventos, departamentos etc.) residem exclusivamente no frontend web e no backend. O app mobile é uma camada de **integração e UX**, não um app nativo de features.
 
-- `App.native.tsx`: native runtime (WebView + navigation control + error flow).
-- `App.web.tsx`: web runtime (redirect to `https://oliva.church/` with fallback CTA).
-- `storage.ts`: AsyncStorage manager helpers.
-- `utils.ts`: domain/scheme validation helpers (`isOlivaDomain`, `isSecureScheme`, etc.).
-- `types.ts`: app and WebView shared types.
-- `app.json`: Expo metadata (name, bundle/package ids, icons).
+---
 
-## Requirements
+## Navegação pela documentação
 
-- Node.js 20 (LTS)
-- npm
-- Expo CLI via `npx expo`
+| Documento | Descrição |
+|-----------|-----------|
+| [ARCHITECTURE.md](markdowns/ARCHITECTURE.md) | Visão geral da arquitetura, decisões de design e padrões |
+| [STRUCTURE.md](markdowns/STRUCTURE.md) | Estrutura de pastas e responsabilidade de cada arquivo |
+| [WEBVIEW.md](markdowns/WEBVIEW.md) | Sistema WebView: configuração, interceptação de URLs e JavaScript Bridge |
+| [NAVIGATION.md](markdowns/NAVIGATION.md) | Navegação mobile, botão de voltar, gestos iOS e deep links |
+| [SECURITY.md](markdowns/SECURITY.md) | Allowlist de domínios, proteção de links externos, boas práticas |
+| [STORAGE.md](markdowns/STORAGE.md) | Persistência local, AsyncStorage e gestão de preferências |
+| [FLOWS.md](markdowns/FLOWS.md) | Fluxos principais: inicialização, erro, sessão, link externo |
+| [BUILD.md](markdowns/BUILD.md) | Configuração de build, EAS, identificadores de pacote, assets |
+| [DEPENDENCIES.md](markdowns/DEPENDENCIES.md) | Dependências, versões e justificativa de uso |
 
-If you use nvm:
+---
+
+## Início rápido
+
+### Pré-requisitos
+
+- Node.js >= 20
+- npm ou yarn
+- Para iOS: macOS + Xcode
+- Para Android: Android Studio + emulador configurado
+
+### Instalação
 
 ```bash
-nvm use
-```
-
-## How to run
-
-1. Install dependencies:
-
-```bash
+cd oliva-app
 npm install
 ```
 
-2. Start Expo:
+### Executar em desenvolvimento
 
 ```bash
+# Menu interativo Expo (escolha plataforma)
 npm start
-```
 
-For Expo Go on physical devices (when LAN/QR does not connect), use:
+# Diretamente no Android
+npm run android
 
-```bash
+# Diretamente no iOS
+npm run ios
+
+# Versão web (fallback/redirect)
+npm run web
+
+# Com tunnel (dispositivo físico externo)
 npm run start:tunnel
 ```
 
-3. Open target:
-
-- Press `a` for Android emulator
-- Press `i` for iOS simulator
-- Press `w` for web preview
-- Or scan QR with Expo Go
-
-## Useful commands
+### Validar configuração
 
 ```bash
-npm start
-npm run android
-npm run ios
-npm run web
+node scripts/validate.js
+# Esperado: 6 ✅ | 0 ❌
+```
+
+### Lint
+
+```bash
 npm run lint
 ```
 
-## Local config
+---
 
-Use `.env.example` as reference for values such as:
+## Pontos de entrada
 
-- `OLIVA_BASE_URL`
-- `OLIVA_DOMAIN`
-- `USER_AGENT`
-- `DEBUG_MODE`
+| Arquivo | Plataforma | Função |
+|---------|-----------|--------|
+| `App.native.tsx` | Android + iOS | WebView host completo, tratamento de navegação e erros |
+| `App.web.tsx` | Web | Redirecionamento para `https://oliva.church/` |
 
-## Notes
+O Expo seleciona automaticamente o arquivo correto via extensão de plataforma (`.native.tsx` vs `.web.tsx`). O entry point configurado em `package.json` é `expo/AppEntry`.
 
-- Keep this app wrapper-focused; business logic stays in `oliva-front` and `oliva-back`.
-- See `context.md` in this folder for coding conventions and architecture constraints.
-- On web, the wrapper redirects to `https://oliva.church/` (WebView is native-only).
-- The old Expo Router scaffold (`app/`) was removed to keep a single-entry wrapper architecture.
+---
 
-## Store compliance (Account Deletion URL)
+## URL carregada na WebView
 
-For manual publishing metadata in Google Play Console / App Store Connect, the account deletion links are versioned in:
+O app detecta o idioma do dispositivo via `expo-localization` e redireciona para a rota de login localizada:
 
-- `compliance/account-deletion-urls.json`
+| Idioma do dispositivo | URL carregada |
+|----------------------|---------------|
+| Português (BR) | `https://oliva.church/pt-br/login` |
+| Português (PT) | `https://oliva.church/pt-pt/login` |
+| Inglês | `https://oliva.church/en/login` |
+| Espanhol | `https://oliva.church/es/login` |
+| Francês | `https://oliva.church/fr/login` |
+| Outros (fallback) | `https://oliva.church/en/login` |
 
-Current locale mapping:
+---
 
-- `en`: `https://oliva.church/en/app/delete-church`
-- `es`: `https://oliva.church/es/app/eliminar-iglesia`
-- `fr`: `https://oliva.church/fr/app/supprimer-eglise`
-- `pt-br`: `https://oliva.church/pt-br/app/apagar-igreja`
-- `pt-pt`: `https://oliva.church/pt-pt/app/apagar-igreja`
+## Domínios permitidos na WebView
 
-Fallback locale is controlled by `fallbackLocale` in the same file.
+Apenas URLs do domínio `oliva.church` e seus subdomínios permanecem dentro da WebView. Qualquer link externo é aberto no navegador nativo do sistema operacional.
+
+```
+✅  oliva.church
+✅  *.oliva.church  (subdomínios)
+❌  qualquer outro domínio → navegador externo
+```
+
+---
+
+## Compliance — Exclusão de conta
+
+O arquivo `compliance/account-deletion-urls.json` mapeia as URLs de exclusão de conta por idioma, conforme exigência das lojas (Apple App Store e Google Play).
+
+| Locale | URL |
+|--------|-----|
+| `en` | `https://oliva.church/en/app/delete-church` |
+| `es` | `https://oliva.church/es/app/eliminar-iglesia` |
+| `fr` | `https://oliva.church/fr/app/supprimer-eglise` |
+| `pt-br` | `https://oliva.church/pt-br/app/apagar-igreja` |
+| `pt-pt` | `https://oliva.church/pt-pt/app/apagar-igreja` |
+
+---
+
+## Responsáveis
+
+| Papel | Nome | Escopo |
+|-------|------|--------|
+| Mobile Engineering | Filipe | Wrapper, WebView, builds, deep links |
+| Frontend | Lucas | Rotas web carregadas no WebView |
+| QA | Tomé | Cobertura de testes mobile e regressão |
+| Produto/UX | Barnabé + Débora | Decisões de fluxo e experiência |
+
+---
+
+## Regras de contribuição
+
+1. Leia `context.md` deste pacote e `oliva-front/context.md` antes de qualquer alteração.
+2. Mantenha mudanças focadas no escopo wrapper — não replique lógica de negócio nativamente.
+3. Toda nova permissão nativa deve ser justificada e aprovada antes de adicionar.
+4. Rodar `npm run lint` e `node scripts/validate.js` antes de qualquer commit.
+5. Seguir padrão Conventional Commits: `feat`, `fix`, `chore`, `docs`, `refactor`.
+6. Publicar sempre em `main` após validação.
+
+---
+
+_Para entendimento do sistema completo, consulte também `oliva-front/context.md` (rotas e fluxos web) e `context.md` na raiz do workspace (visão geral do monorepo)._
